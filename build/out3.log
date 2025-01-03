@@ -1,0 +1,64 @@
+ PARAMETER DEFINITIONS:
+    NO.   NAME         VALUE      STEP SIZE      LIMITS
+     1 delta_m2_21   1.40000e-04  1.00000e-07    0.00000e+00  1.00000e-03
+     2 delta_m2_32   4.45500e-03  1.00000e-06    0.00000e+00  1.00000e-01
+     3 sin2_theta_12   6.07000e-01  1.00000e-03    0.00000e+00  1.00000e+00
+     4 sin2_theta_13   4.19000e-02  1.00000e-03    0.00000e+00  1.00000e+00
+     5 sin2_theta_23   8.53000e-01  1.00000e-03    0.00000e+00  1.00000e+00
+     6 delta_CP     1.88496e+00  1.00000e-02    0.00000e+00  6.28319e+00
+ **********
+ **    1 **MIGRAD
+ **********
+ FIRST CALL TO USER FUNCTION AT NEW START POINT, WITH IFLAG=4.
+ START MIGRAD MINIMIZATION.  STRATEGY  1.  CONVERGENCE WHEN EDM .LT. 1.00e-04
+ FCN=7425.45 FROM MIGRAD    STATUS=INITIATE       22 CALLS          23 TOTAL
+                     EDM= unknown      STRATEGY= 1      NO ERROR MATRIX       
+  EXT PARAMETER               CURRENT GUESS       STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  delta_m2_21   1.40000e-04   1.00000e-07   2.88195e-04   1.42662e+04
+   2  delta_m2_32   4.45500e-03   1.00000e-06   4.84699e-05   9.33066e+04
+   3  sin2_theta_12   6.07000e-01   1.00000e-03   2.04743e-03   1.42504e+03
+   4  sin2_theta_13   4.19000e-02   1.00000e-03   4.99135e-03   1.59859e+04
+   5  sin2_theta_23   8.53000e-01   1.00000e-03   2.82403e-03   7.05824e+02
+   6  delta_CP     1.88496e+00   1.00000e-02   3.47306e-03  -2.99241e+02
+ MIGRAD MINIMIZATION HAS CONVERGED.
+ FCN=44.7276 FROM MIGRAD    STATUS=CONVERGED     180 CALLS         181 TOTAL
+                     EDM=1.74983e-06    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   7.7 per cent
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  delta_m2_21   7.54088e-05   1.78174e-06   1.56395e-06   1.76386e-01
+   2  delta_m2_32   2.53012e-03   2.92377e-05  -7.01337e-07  -6.20139e-01
+   3  sin2_theta_12   3.07417e-01   1.27676e-02  -4.16361e-05  -2.67376e-02
+   4  sin2_theta_13   2.19899e-02   6.73741e-04   5.55696e-06  -2.50397e-01
+   5  sin2_theta_23   5.55560e-01   1.71631e-02  -9.14529e-05  -2.96823e-02
+   6  delta_CP     3.65202e+00   2.97510e-01   1.78699e-04  -1.76205e-02
+ EXTERNAL ERROR MATRIX.    NDIM=  25    NPAR=  6    ERR DEF=1
+  3.175e-12  1.290e-12  7.913e-10  9.052e-11  2.222e-09  8.780e-09 
+  1.290e-12  8.548e-10 -1.436e-08 -1.421e-09 -2.217e-08 -4.509e-07 
+  7.913e-10 -1.436e-08  1.631e-04 -3.388e-07 -1.123e-05 -4.030e-04 
+  9.052e-11 -1.421e-09 -3.388e-07  4.539e-07 -1.147e-06 -2.361e-05 
+  2.222e-09 -2.217e-08 -1.123e-05 -1.147e-06  2.947e-04  1.005e-04 
+  8.780e-09 -4.509e-07 -4.030e-04 -2.361e-05  1.005e-04  8.879e-02 
+ PARAMETER  CORRELATION COEFFICIENTS  
+       NO.  GLOBAL      1      2      3      4      5      6
+        1  0.12779   1.000  0.025  0.035  0.075  0.073  0.017
+        2  0.12490   0.025  1.000 -0.038 -0.072 -0.044 -0.052
+        3  0.14748   0.035 -0.038  1.000 -0.039 -0.051 -0.106
+        4  0.20443   0.075 -0.072 -0.039  1.000 -0.099 -0.118
+        5  0.15133   0.073 -0.044 -0.051 -0.099  1.000  0.020
+        6  0.17702   0.017 -0.052 -0.106 -0.118  0.020  1.000
+Fit completed successfully.
+Final chi-squared value: 44.7276
+Estimated distance to minimum (EDM): 1.74983e-06
+Number of parameters: 6
+Fit status: 3
+Saved histogram: final_numu_flux_rebinned to file.
+Saved histogram: final_nue_flux_rebinned to file.
+Saved histogram: final_numubar_flux_rebinned to file.
+Saved histogram: final_nuebar_flux_rebinned to file.
+Saved histogram: observed_numu_rebinned to file.
+Saved histogram: observed_nue_rebinned to file.
+Saved histogram: observed_numubar_rebinned to file.
+Saved histogram: observed_nuebar_rebinned to file.
+All histograms saved to check_event_hists.root.
+Fitter executed successfully.
