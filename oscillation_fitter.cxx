@@ -1,7 +1,7 @@
 #include "oscillation_fitter.h"
 
 // Define absolute paths to ROOT files
-const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/extracted_data/"; // Update this directory on one's own machine
+const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/qiyubin_data/"; // Update this directory on one's own machine
 const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_normal.root";
 const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
 const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
@@ -136,8 +136,8 @@ void calculate_oscillation_probabilities(
     double theta_13 = sin2_theta_13;
     double theta_23 = sin2_theta_23;
 
-    int NBinsEnergy = 200;
-    int Dm12ZenithNbin = 200;
+    const int NBinsEnergy = 400;
+    const int Dm12ZenithNbin = 480;
     double EnergyBins[NBinsEnergy + 1];
     double Dm12ZenithEdge[Dm12ZenithNbin + 1];
     for (int i = 0; i <= NBinsEnergy; ++i) {
@@ -190,7 +190,7 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
     fval = 0.0;
 
     const double delta_m2_21   = par[0];
-    const double delta_m2_32   = TMath::Abs(par[1]);
+    const double delta_m2_32   = -TMath::Abs(par[1]);
     const double sin2_theta_12 = par[2];
     const double sin2_theta_13 = par[3];
     const double sin2_theta_23 = par[4];
@@ -270,10 +270,10 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
     // add pull terms to chi2
     double pull[6];
     pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
-    pull[1] = pow((delta_m2_32 - 2.455e-3) / (0.029e-3), 2);
+    pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
     pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
     pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
-    pull[4] = pow((sin2_theta_23 - 0.558) / (0.02), 2);
+    pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
     pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
 
     for (int i = 0; i < 6; i++) {
@@ -297,12 +297,12 @@ void compute_final_flux_fitter() {
     // minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.75 * TMath::Pi(), 1.63 * TMath::Pi());
 
         // Define the parameter for the fit
-    minuit.DefineParameter(0, "delta_m2_21", 7.5371e-5, 1e-7, 0.0, 1e-3);
-    minuit.DefineParameter(1, "delta_m2_32", 2.5219e-3, 1e-6, 0.0, 0.1);
-    minuit.DefineParameter(2, "sin2_theta_12", 0.3072, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(3, "sin2_theta_13", 0.0219, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(4, "sin2_theta_23", 0.5463, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
+    minuit.DefineParameter(0, "delta_m2_21", 1.531e-4, 1e-7, 0.0, 1e-3);
+    minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 0.1);
+    minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(4, "sin2_theta_23", 0.278, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
 
     // Perform the minimization
     minuit.Migrad();
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
         // Run the fit
         compute_final_flux_fitter();
 
-        // save_rebinned_histograms("check_event_hists.root");
+        save_rebinned_histograms("check_event_hists.root");
 
         // Output success
         std::cout << "Fitter executed successfully." << std::endl;
@@ -346,8 +346,8 @@ int main(int argc, char** argv) {
 
 // Function to rebin histograms for expected and observed event rates
 void rebin_histograms() {
-    const int blockSizeX = 20; // Number of bins to combine along X (energy)
-    const int blockSizeY = 20; // Number of bins to combine along Y (cosine)
+    const int blockSizeX = 40; // Number of bins to combine along X (energy)
+    const int blockSizeY = 40; // Number of bins to combine along Y (cosine)
 
     // Clear previous rebinned histograms to avoid duplication
     for (auto* hist : rebinned_expected_event_hists) {
@@ -361,12 +361,12 @@ void rebin_histograms() {
     rebinned_observed_event_hists.clear();
 
     auto createReducedHistogram = [](const std::string& title, const std::string& name) {
-        return new TH2D(name.c_str(), title.c_str(), 10, 0, 10, 10, 0, 10); // Use bin numbers as range
+        return new TH2D(name.c_str(), title.c_str(), 10, 0, 10, 12, 0, 12); // Use bin numbers as range
     };
 
     auto fillReducedHistogram = [&](TH2D* original, TH2D* reduced) {
         for (int bx = 0; bx < 10; ++bx) {
-            for (int by = 0; by < 10; ++by) {
+            for (int by = 0; by < 12; ++by) {
                 double sum = 0.0;
                 for (int ix = 1; ix <= blockSizeX; ++ix) {
                     for (int iy = 1; iy <= blockSizeY; ++iy) {
