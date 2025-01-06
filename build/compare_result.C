@@ -11,10 +11,15 @@ void sum_histograms(const char* root_file_path = "check_event_hists.root") {
     }
 
     // Load the histograms
-    TH2D* hist_final_numu = (TH2D*)root_file->Get("final_numu_flux_rebinned");
-    TH2D* hist_final_nue = (TH2D*)root_file->Get("final_nue_flux_rebinned");
-    TH2D* hist_final_numubar = (TH2D*)root_file->Get("final_numubar_flux_rebinned");
-    TH2D* hist_final_nuebar = (TH2D*)root_file->Get("final_nuebar_flux_rebinned");
+    // TH2D* hist_final_numu = (TH2D*)root_file->Get("final_numu_flux_rebinned");
+    // TH2D* hist_final_nue = (TH2D*)root_file->Get("final_nue_flux_rebinned");
+    // TH2D* hist_final_numubar = (TH2D*)root_file->Get("final_numubar_flux_rebinned");
+    // TH2D* hist_final_nuebar = (TH2D*)root_file->Get("final_nuebar_flux_rebinned");
+
+    TH2D* hist_final_numu = (TH2D*)root_file->Get("Prediction_hist_numu");
+    TH2D* hist_final_nue = (TH2D*)root_file->Get("Prediction_hist_nue");
+    TH2D* hist_final_numubar = (TH2D*)root_file->Get("Prediction_hist_numubar");
+    TH2D* hist_final_nuebar = (TH2D*)root_file->Get("Prediction_hist_nuebar");
 
     TH2D* hist_observed_numu = (TH2D*)root_file->Get("observed_numu_rebinned");
     TH2D* hist_observed_nue = (TH2D*)root_file->Get("observed_nue_rebinned");
