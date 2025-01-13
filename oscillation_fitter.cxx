@@ -141,10 +141,10 @@ void calculate_oscillation_probabilities(
     double EnergyBins[NBinsEnergy + 1];
     double Dm12ZenithEdge[Dm12ZenithNbin + 1];
     for (int i = 0; i <= NBinsEnergy; ++i) {
-       EnergyBins[i] = 0.1 * pow(10.0, double(i) * log10(20.0/0.1) / NBinsEnergy);
+       EnergyBins[i] = 0.1 * pow(10.0, double(i) * log10(200.0) / NBinsEnergy);
     }
     for (int i = 0; i <= Dm12ZenithNbin; ++i) {
-       Dm12ZenithEdge[i] = -1.0 + double(i) * (1.0 + 1.0) / Dm12ZenithNbin;
+       Dm12ZenithEdge[i] = -1.0 + double(i) * (2.0) / Dm12ZenithNbin;
     }
 
     for (size_t i = 0; i < flux_histograms.size(); ++i) {
@@ -260,8 +260,8 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
     for (size_t i = 0; i < flux_histograms.size(); i++) {
         for (int e_bin = 1; e_bin <= rebinned_expected_event_hists[i]->GetNbinsX(); ++e_bin) {
             for (int cos_bin = 1; cos_bin <= rebinned_expected_event_hists[i]->GetNbinsY(); ++cos_bin) {
-                double E = rebinned_expected_event_hists[i]->GetBinContent(e_bin, cos_bin);
-                double O = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin);
+                double O = rebinned_expected_event_hists[i]->GetBinContent(e_bin, cos_bin);
+                double E = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin);
                 if (E > 0 && O > 0) fval += 2 * (E - O + O * TMath::Log(O / E));
             }
         }
@@ -301,7 +301,7 @@ void compute_final_flux_fitter() {
     minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 0.1);
     minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
     minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(4, "sin2_theta_23", 0.278, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(4, "sin2_theta_23", 0.278, 0.001, 0.5, 1.0);
     minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
 
     // Perform the minimization
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
         // Run the fit
         compute_final_flux_fitter();
 
-        save_rebinned_histograms("check_event_hists.root");
+        // save_rebinned_histograms("check_event_hists.root");
 
         // Output success
         std::cout << "Fitter executed successfully." << std::endl;
