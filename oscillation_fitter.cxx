@@ -2,7 +2,7 @@
 
 // Define absolute paths to ROOT files
 const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/qiyubin_data/"; // Update this directory on one's own machine
-const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_invert.root";
+const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_normal.root";
 const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
 const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
 const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "numubar_flux.root";
@@ -190,7 +190,7 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
     fval = 0.0;
 
     const double delta_m2_21   = par[0];
-    const double delta_m2_32   = TMath::Abs(par[1]);
+    const double delta_m2_32   = -TMath::Abs(par[1]);
     const double sin2_theta_12 = par[2];
     const double sin2_theta_13 = par[3];
     const double sin2_theta_23 = par[4];
@@ -269,19 +269,19 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
 
     // add pull terms to chi2
     double pull[6];
-    // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
-    // pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
-    // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
-    // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
-    // pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
-    // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
-
     pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
-    pull[1] = pow((delta_m2_32 - 2.455e-3) / (0.028e-3), 2);
+    pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
     pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
     pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
-    pull[4] = pow((sin2_theta_23 - 0.558) / (0.018), 2);
+    pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
     pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
+
+    // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
+    // pull[1] = pow((delta_m2_32 - 2.455e-3) / (0.028e-3), 2);
+    // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
+    // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
+    // pull[4] = pow((sin2_theta_23 - 0.558) / (0.018), 2);
+    // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
 
     for (int i = 0; i < 6; i++) {
         fval += pull[i];
@@ -296,20 +296,20 @@ void compute_final_flux_fitter() {
     minuit.SetFCN(chi_squared_function);
 
     // // Define the parameter for the fit
-    // minuit.DefineParameter(0, "delta_m2_21", 7.65e-5, 1e-7, 5.17e-5, 2.01e-4);
-    // minuit.DefineParameter(1, "delta_m2_32", 2.529e-3, 1e-6, 0, 2.371e-3);
-    // minuit.DefineParameter(2, "sin2_theta_12", 0.307, 0.001, 0.283, 0.533);
-    // minuit.DefineParameter(3, "sin2_theta_13", 0.0219, 0.001, 0.0205, 0.0633);
-    // minuit.DefineParameter(4, "sin2_theta_23", 0.553, 0.001, 0.505, 0.785);
-    // minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.75 * TMath::Pi(), 1.63 * TMath::Pi());
+    minuit.DefineParameter(0, "delta_m2_21", 7.65e-5, 1e-7, 5.17e-6, 2.01e-3);
+    minuit.DefineParameter(1, "delta_m2_32", 2.529e-3, 1e-6, 0.0, 2.371e-1);
+    minuit.DefineParameter(2, "sin2_theta_12", 0.307, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(3, "sin2_theta_13", 0.0219, 0.001, 0.0, 1.0);
+    minuit.DefineParameter(4, "sin2_theta_23", 0.553, 0.001, 0.50, 1.0);
+    minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.75 * TMath::Pi(), 1.63 * TMath::Pi());
 
         // Define the parameter for the fit
-    minuit.DefineParameter(0, "delta_m2_21", 1.531e-4, 1e-7, 0.0, 1.0);
-    minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 1.0);
-    minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(4, "sin2_theta_23", 0.778, 0.001, 0.5, 1.0);
-    minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
+    // minuit.DefineParameter(0, "delta_m2_21", 1.531e-4, 1e-7, 0.0, 1.0);
+    // minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 1.0);
+    // minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
+    // minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
+    // minuit.DefineParameter(4, "sin2_theta_23", 0.778, 0.001, 0.5, 1.0);
+    // minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
 
     // Perform the minimization
     minuit.Migrad();
