@@ -2,7 +2,7 @@
 
 // Define absolute paths to ROOT files
 const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/qiyubin_data/"; // Update this directory on one's own machine
-const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_normal.root";
+const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "ICm_event_normal.root";
 const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
 const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
 const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "numubar_flux.root";
