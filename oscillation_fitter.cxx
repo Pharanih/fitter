@@ -1,14 +1,15 @@
 #include "oscillation_fitter.h"
 
 // Define absolute paths to ROOT files
-const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/qiyubin_data/"; // Update this directory on one's own machine
-const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "ICm_event_normal.root";
+const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/sdu/"; // Update this directory on one's own machine
+const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_normal.root";
 const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
 const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
 const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "numubar_flux.root";
 const std::string NUEBAR_FLUX_ROOT = ROOT_FILES_DIR + "nuebar_flux.root";
-const std::string XSEC_C12_ROOT = ROOT_FILES_DIR + "xsec_tot_cc_C12.root";
-const std::string XSEC_H1_ROOT = ROOT_FILES_DIR + "xsec_tot_cc_H1.root";
+const std::string XSEC_C12_ROOT = ROOT_FILES_DIR + "xsec_C12.root";
+const std::string XSEC_H1_ROOT = ROOT_FILES_DIR + "xsec_H1.root";
+
 
 // Global variable definitions
 std::vector<TH2D*> expected_event_hists;
@@ -95,17 +96,17 @@ void initialize() {
 
     // Load cross-section histograms
     xsec_C12_histograms = {
-        loadTH1D(XSEC_C12_ROOT, "nu_mu_tot_cc"),
-        loadTH1D(XSEC_C12_ROOT, "nu_e_tot_cc"),
-        loadTH1D(XSEC_C12_ROOT, "nu_mu_bar_tot_cc"),
-        loadTH1D(XSEC_C12_ROOT, "nu_e_bar_tot_cc")
+        loadTH1D(XSEC_C12_ROOT, "nu_mu_C12"),
+        loadTH1D(XSEC_C12_ROOT, "nu_e_C12"),
+        loadTH1D(XSEC_C12_ROOT, "nu_mu_bar_C12"),
+        loadTH1D(XSEC_C12_ROOT, "nu_e_bar_C12")
     };
 
     xsec_H1_histograms = {
-        loadTH1D(XSEC_H1_ROOT, "nu_mu_tot_cc"),
-        loadTH1D(XSEC_H1_ROOT, "nu_e_tot_cc"),
-        loadTH1D(XSEC_H1_ROOT, "nu_mu_bar_tot_cc"),
-        loadTH1D(XSEC_H1_ROOT, "nu_e_bar_tot_cc")
+        loadTH1D(XSEC_H1_ROOT, "nu_mu_H1"),
+        loadTH1D(XSEC_H1_ROOT, "nu_e_H1"),
+        loadTH1D(XSEC_H1_ROOT, "nu_mu_bar_H1"),
+        loadTH1D(XSEC_H1_ROOT, "nu_e_bar_H1")
     };
 
     // observed_event_rate = (TH1D*)expected_event_rate->Clone("observed_event_rate");
@@ -137,7 +138,7 @@ void calculate_oscillation_probabilities(
     double theta_23 = sin2_theta_23;
 
     const int NBinsEnergy = 400;
-    const int Dm12ZenithNbin = 480;
+    const int Dm12ZenithNbin = 400;
     double EnergyBins[NBinsEnergy + 1];
     double Dm12ZenithEdge[Dm12ZenithNbin + 1];
     for (int i = 0; i <= NBinsEnergy; ++i) {
@@ -368,12 +369,12 @@ void rebin_histograms() {
     rebinned_observed_event_hists.clear();
 
     auto createReducedHistogram = [](const std::string& title, const std::string& name) {
-        return new TH2D(name.c_str(), title.c_str(), 10, 0, 10, 12, 0, 12); // Use bin numbers as range
+        return new TH2D(name.c_str(), title.c_str(), 10, 0, 10, 10, 0, 10); // Use bin numbers as range
     };
 
     auto fillReducedHistogram = [&](TH2D* original, TH2D* reduced) {
         for (int bx = 0; bx < 10; ++bx) {
-            for (int by = 0; by < 12; ++by) {
+            for (int by = 0; by < 10; ++by) {
                 double sum = 0.0;
                 for (int ix = 1; ix <= blockSizeX; ++ix) {
                     for (int iy = 1; iy <= blockSizeY; ++iy) {

@@ -22,17 +22,17 @@ const double unit_conversion = 1e-42;           // Cross-section units from 10^-
 const double runtime = 6 * 365.25 * 24 * 3600;  // Seconds in 6 years
 
 // Atom counts
-const double carbon_ratio = 73 * 12.0 / (73 * 12.0 + 120.0);
-const double molar_mass_carbon = 12.0;  // g/mol
+const double carbon_ratio = 0.88;
+const double molar_mass_carbon = 12.0106;  // g/mol
 const double mass_carbon = mass_lab * carbon_ratio * 1e3;  // Convert to grams
 const double moles_carbon = mass_carbon / molar_mass_carbon;
-const double atoms_C12 = moles_carbon * 6.022e23;  // Avogadro's number
+const double atoms_C12 = moles_carbon * 6.02214076e23;  // Avogadro's number
 
-const double hydrogen_ratio = 120.0 / (73 * 12.0 + 120.0);
-const double molar_mass_hydrogen = 1.0;  // g/mol
+const double hydrogen_ratio = 0.12
+const double molar_mass_hydrogen = 1.0079750;  // g/mol
 const double mass_hydrogen = mass_lab * hydrogen_ratio * 1e3;  // Convert to grams
 const double moles_hydrogen = mass_hydrogen / molar_mass_hydrogen;
-const double atoms_H1 = moles_hydrogen * 6.022e23;  // Avogadro's number
+const double atoms_H1 = moles_hydrogen * 6.02214076e23;  // Avogadro's number
 
 // Factors for Event Rates
 const double C12_factor = atoms_C12 * runtime * solid_angle * unit_conversion;
