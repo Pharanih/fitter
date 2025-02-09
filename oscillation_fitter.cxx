@@ -1,14 +1,14 @@
 #include "oscillation_fitter.h"
 
 // Define absolute paths to ROOT files
-const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/sdu/"; // Update this directory on one's own machine
-const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "event_normal.root";
+const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/sdu_xcheck/"; // Update this directory on one's own machine
+const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "xcheck_event_invert.root";
 const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
 const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
 const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "numubar_flux.root";
 const std::string NUEBAR_FLUX_ROOT = ROOT_FILES_DIR + "nuebar_flux.root";
-const std::string XSEC_C12_ROOT = ROOT_FILES_DIR + "xsec_C12.root";
-const std::string XSEC_H1_ROOT = ROOT_FILES_DIR + "xsec_H1.root";
+const std::string XSEC_C12_ROOT = ROOT_FILES_DIR + "xcheck_xsec_tot_cc_C12.root";
+const std::string XSEC_H1_ROOT = ROOT_FILES_DIR + "xcheck_xsec_tot_cc_H1.root";
 
 
 // Global variable definitions
@@ -96,17 +96,17 @@ void initialize() {
 
     // Load cross-section histograms
     xsec_C12_histograms = {
-        loadTH1D(XSEC_C12_ROOT, "nu_mu_C12"),
-        loadTH1D(XSEC_C12_ROOT, "nu_e_C12"),
-        loadTH1D(XSEC_C12_ROOT, "nu_mu_bar_C12"),
-        loadTH1D(XSEC_C12_ROOT, "nu_e_bar_C12")
+        loadTH1D(XSEC_C12_ROOT, "nu_mu_tot_cc"),
+        loadTH1D(XSEC_C12_ROOT, "nu_e_tot_cc"),
+        loadTH1D(XSEC_C12_ROOT, "nu_mu_bar_tot_cc"),
+        loadTH1D(XSEC_C12_ROOT, "nu_e_bar_tot_cc")
     };
 
     xsec_H1_histograms = {
-        loadTH1D(XSEC_H1_ROOT, "nu_mu_H1"),
-        loadTH1D(XSEC_H1_ROOT, "nu_e_H1"),
-        loadTH1D(XSEC_H1_ROOT, "nu_mu_bar_H1"),
-        loadTH1D(XSEC_H1_ROOT, "nu_e_bar_H1")
+        loadTH1D(XSEC_H1_ROOT, "nu_mu_tot_cc"),
+        loadTH1D(XSEC_H1_ROOT, "nu_e_tot_cc"),
+        loadTH1D(XSEC_H1_ROOT, "nu_mu_bar_tot_cc"),
+        loadTH1D(XSEC_H1_ROOT, "nu_e_bar_tot_cc")
     };
 
     // observed_event_rate = (TH1D*)expected_event_rate->Clone("observed_event_rate");
@@ -124,8 +124,14 @@ void calculate_oscillation_probabilities(
 
     bNu = new BargerPropagator();
     bNu->UseMassEigenstates(false);
+    bNu->SetOneMassScaleMode(false);
     bNu->SetDefaultOctant(23, 2);
+    bNu->SetWarningSuppression(true);
     myNu = bNu;
+
+    if (sin2_theta_23 < 0.5) {
+        bNu->SetDefaultOctant(23, 1);
+    }
 
     // myNu->SetPathLength(15.0); // Approximate Earth path length
 
@@ -186,16 +192,138 @@ void calculate_oscillation_probabilities(
     }
 }
 
-// Chi-squared function for minimization
-void chi_squared_function(int& npar, double* grad, double& fval, double* par, int flag) {
-    fval = 0.0;
+// // Chi-squared function for minimization
+// void chi_squared_function(int& npar, double* grad, double& fval, double* par, int flag) {
+//     fval = 0.0;
 
-    const double delta_m2_21   = par[0];
-    const double delta_m2_32   = -TMath::Abs(par[1]);
-    const double sin2_theta_12 = par[2];
-    const double sin2_theta_13 = par[3];
-    const double sin2_theta_23 = par[4];
-    const double delta_CP      = par[5];
+//     const double delta_m2_21   = par[0];
+//     const double delta_m2_32   = -TMath::Abs(par[1]);
+//     const double sin2_theta_12 = par[2];
+//     const double sin2_theta_13 = par[3];
+//     const double sin2_theta_23 = par[4];
+//     const double delta_CP      = par[5];
+
+//     // observed_event_rate->Reset();
+
+//     // for (int kNuBar : {1, -1}) { // Loop over neutrino (1) and antineutrino (-1)
+//         std::vector<TH2D*> osc_probabilities;
+//         calculate_oscillation_probabilities(delta_m2_21, delta_m2_32, sin2_theta_12, sin2_theta_13, sin2_theta_23, delta_CP, osc_probabilities);
+
+//         double E = 0.0;
+//         double O = 0.0;
+
+//         for (size_t i = 0; i < flux_histograms.size(); i += 2) { // Step through numu and nue together
+//             TH2D* numu_flux = flux_histograms[i];
+//             TH2D* nue_flux = flux_histograms[i + 1];
+//             TH2D* numu_prob_dis = osc_probabilities[i*2];
+//             TH2D* numu_prob_app = osc_probabilities[i*2 + 1];
+//             TH2D* nue_prob_dis = osc_probabilities[i*2 + 2];
+//             TH2D* nue_prob_app = osc_probabilities[i*2 + 3];
+//             TH1D* numu_xsec_C12 = xsec_C12_histograms[i];
+//             TH1D* numu_xsec_H1 = xsec_H1_histograms[i];
+//             TH1D* nue_xsec_C12 = xsec_C12_histograms[i + 1];
+//             TH1D* nue_xsec_H1 = xsec_H1_histograms[i + 1];
+
+//             // TH1D* temp_observed_event_rate = (TH1D*)observed_event_rate->Clone("temp_observed_event_rate");
+//             // temp_observed_event_rate->Reset();
+
+//             for (int e_bin = 1; e_bin <= numu_flux->GetNbinsX(); ++e_bin) {
+//                 for (int cos_bin = 1; cos_bin <= numu_flux->GetNbinsY(); ++cos_bin) {
+//                     double numu_flux_val = numu_flux->GetBinContent(e_bin, cos_bin);
+//                     double nue_flux_val = nue_flux->GetBinContent(e_bin, cos_bin);
+
+//                     double numu_prob_dis_val = numu_prob_dis->GetBinContent(e_bin, cos_bin);
+//                     double numu_prob_app_val = numu_prob_app->GetBinContent(e_bin, cos_bin);
+//                     double nue_prob_dis_val = nue_prob_dis->GetBinContent(e_bin, cos_bin);
+//                     double nue_prob_app_val = nue_prob_app->GetBinContent(e_bin, cos_bin);
+
+//                     double numu_event_C12 = (numu_flux_val * numu_prob_dis_val + nue_flux_val * numu_prob_app_val )
+//                                             * numu_xsec_C12->GetBinContent(e_bin) * C12_factor;
+//                     double numu_event_H1 = (numu_flux_val * numu_prob_dis_val + nue_flux_val * numu_prob_app_val ) 
+//                                             * numu_xsec_H1->GetBinContent(e_bin) * H1_factor;
+
+//                     double nue_event_C12 = (nue_flux_val * nue_prob_dis_val + numu_flux_val * nue_prob_app_val) 
+//                                             * nue_xsec_C12->GetBinContent(e_bin) * C12_factor;
+//                     double nue_event_H1 = (nue_flux_val * nue_prob_dis_val + numu_flux_val * nue_prob_app_val)
+//                                              * nue_xsec_H1->GetBinContent(e_bin) * H1_factor;
+
+//                     double total_event_numu = numu_event_C12 + numu_event_H1;
+//                     double total_event_nue = nue_event_C12 + nue_event_H1;
+//                     // temp_observed_event_rate->Fill(numu_flux->GetXaxis()->GetBinCenter(e_bin), total_event);
+
+//                     observed_event_hists[i]->SetBinContent(e_bin, cos_bin, total_event_numu);
+//                     observed_event_hists[i+1]->SetBinContent(e_bin, cos_bin, total_event_nue);
+//                 }
+//             }
+
+//             // observed_event_rate->Add(temp_observed_event_rate);
+//             // delete temp_observed_event_rate;
+//         }
+//         for (auto* hist : osc_probabilities) delete hist; // Clean up memory
+//     // }
+
+//     rebin_histograms();
+
+//     for (size_t i = 0; i < flux_histograms.size(); i++) {
+//         for (int e_bin = 1; e_bin <= rebinned_expected_event_hists[i]->GetNbinsX(); ++e_bin) {
+//             for (int cos_bin = 1; cos_bin <= rebinned_expected_event_hists[i]->GetNbinsY(); ++cos_bin) {
+//                 double O = rebinned_expected_event_hists[i]->GetBinContent(e_bin, cos_bin);
+//                 double E = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin);
+//                 if (E > 0 && O > 0) fval += 2 * (E - O + O * TMath::Log(O / E));
+//             }
+//         }
+//     }
+
+//     // add pull terms to chi2
+//     // double pull[6];
+//     // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
+//     // pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
+//     // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
+//     // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
+//     // pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
+//     // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
+
+//     // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
+//     // pull[1] = pow((delta_m2_32 - 2.455e-3) / (0.028e-3), 2);
+//     // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
+//     // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
+//     // pull[4] = pow((sin2_theta_23 - 0.558) / (0.018), 2);
+//     // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
+
+//     // for (int i = 0; i < 6; i++) {
+//     //     fval += pull[i];
+//     // }
+// }
+
+
+
+
+// Chi-squared function for minimization
+void chi_squared_function() {
+    double chi = 0.0;
+
+    // IO
+    // const double delta_m2_21   = 7.53e-5;
+    // const double delta_m2_32   = -TMath::Abs(2.529e-3);
+    // const double sin2_theta_12 = 0.307;
+    // const double sin2_theta_13 = 2.19e-2;
+    // const double sin2_theta_23 = 0.553;
+    // const double delta_CP      = 1.19*TMath::Pi();
+
+    // NO
+    const double delta_m2_21   = 7.53e-5;
+    const double delta_m2_32   = TMath::Abs(2.455e-3);
+    const double sin2_theta_12 = 0.307;
+    const double sin2_theta_13 = 2.19e-2;
+    const double sin2_theta_23 = 0.558;
+    const double delta_CP      = 1.19*TMath::Pi();
+
+    // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
+    // pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
+    // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
+    // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
+    // pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
+    // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
 
     // observed_event_rate->Reset();
 
@@ -256,26 +384,28 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
         for (auto* hist : osc_probabilities) delete hist; // Clean up memory
     // }
 
-    rebin_histograms();
+    rebin_wing_histograms();
 
     for (size_t i = 0; i < flux_histograms.size(); i++) {
         for (int e_bin = 1; e_bin <= rebinned_expected_event_hists[i]->GetNbinsX(); ++e_bin) {
             for (int cos_bin = 1; cos_bin <= rebinned_expected_event_hists[i]->GetNbinsY(); ++cos_bin) {
                 double O = rebinned_expected_event_hists[i]->GetBinContent(e_bin, cos_bin);
-                double E = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin);
-                if (E > 0 && O > 0) fval += 2 * (E - O + O * TMath::Log(O / E));
+                double E = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin); 
+                if (E > 0 && O > 0) chi  += 2 * (E - O + O * TMath::Log(O / E));
             }
         }
     }
 
+    std::cout << "Chi-squared value: " << chi << std::endl;
+
     // add pull terms to chi2
-    double pull[6];
-    pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
-    pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
-    pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
-    pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
-    pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
-    pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
+    // double pull[6];
+    // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
+    // pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
+    // pull[2] = pow((sin2_theta_12 - 0.307) / (0.013), 2);
+    // pull[3] = pow((sin2_theta_13 - 2.19e-2) / (0.07e-2), 2);
+    // pull[4] = pow((sin2_theta_23 - 0.553) / (0.02), 2);
+    // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
 
     // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
     // pull[1] = pow((delta_m2_32 - 2.455e-3) / (0.028e-3), 2);
@@ -284,48 +414,9 @@ void chi_squared_function(int& npar, double* grad, double& fval, double* par, in
     // pull[4] = pow((sin2_theta_23 - 0.558) / (0.018), 2);
     // pull[5] = pow((delta_CP - 1.19*TMath::Pi()) / (0.22*TMath::Pi()), 2);
 
-    for (int i = 0; i < 6; i++) {
-        fval += pull[i];
-    }
-}
-
-
-// Main fitter function
-void compute_final_flux_fitter() {
-    // Initialize TMinuit with one parameter
-    TMinuit minuit(6);
-    minuit.SetFCN(chi_squared_function);
-
-    // // Define the parameter for the fit
-    minuit.DefineParameter(0, "delta_m2_21", 7.65e-5, 1e-7, 5.17e-6, 2.01e-3);
-    minuit.DefineParameter(1, "delta_m2_32", 2.529e-3, 1e-6, 0.0, 2.371e-1);
-    minuit.DefineParameter(2, "sin2_theta_12", 0.307, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(3, "sin2_theta_13", 0.0219, 0.001, 0.0, 1.0);
-    minuit.DefineParameter(4, "sin2_theta_23", 0.553, 0.001, 0.50, 1.0);
-    minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.75 * TMath::Pi(), 1.63 * TMath::Pi());
-
-        // Define the parameter for the fit
-    // minuit.DefineParameter(0, "delta_m2_21", 1.531e-4, 1e-7, 0.0, 1.0);
-    // minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 1.0);
-    // minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
-    // minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
-    // minuit.DefineParameter(4, "sin2_theta_23", 0.778, 0.001, 0.5, 1.0);
-    // minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
-
-    // Perform the minimization
-    minuit.Migrad();
-
-    // Retrieve and output the final chi-squared value
-    double fmin, fedm, errdef;
-    int npari, nparx, istat;
-    minuit.mnstat(fmin, fedm, errdef, npari, nparx, istat);
-
-    // Output the final chi-squared value
-    std::cout << "Fit completed successfully." << std::endl;
-    std::cout << "Final chi-squared value: " << fmin << std::endl;
-    std::cout << "Estimated distance to minimum (EDM): " << fedm << std::endl;
-    std::cout << "Number of parameters: " << npari << std::endl;
-    std::cout << "Fit status: " << istat << std::endl;
+    // for (int i = 0; i < 6; i++) {
+    //     fval += pull[i];
+    // }
 }
 
 
@@ -336,7 +427,7 @@ int main(int argc, char** argv) {
         initialize();
         
         // Run the fit
-        compute_final_flux_fitter();
+        chi_squared_function();
 
         // save_rebinned_histograms("check_event_hists.root");
 
@@ -351,6 +442,82 @@ int main(int argc, char** argv) {
     }
     return EXIT_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Main fitter function
+// void compute_final_flux_fitter() {
+//     // Initialize TMinuit with one parameter
+//     TMinuit minuit(6);
+//     minuit.SetFCN(chi_squared_function);
+
+//     // // Define the parameter for the fit
+//     minuit.DefineParameter(0, "delta_m2_21", 7.65e-5, 1e-7, 5.17e-6, 2.01e-3);
+//     minuit.DefineParameter(1, "delta_m2_32", 2.529e-3, 1e-6, 0.0, 2.371e-1);
+//     minuit.DefineParameter(2, "sin2_theta_12", 0.307, 0.001, 0.0, 1.0);
+//     minuit.DefineParameter(3, "sin2_theta_13", 0.0219, 0.001, 0.0, 1.0);
+//     minuit.DefineParameter(4, "sin2_theta_23", 0.553, 0.001, 0.50, 1.0);
+//     minuit.DefineParameter(5, "delta_CP", 1.19 * TMath::Pi(), 0.01, 0.75 * TMath::Pi(), 1.63 * TMath::Pi());
+
+//         // Define the parameter for the fit
+//     // minuit.DefineParameter(0, "delta_m2_21", 1.531e-4, 1e-7, 0.0, 1.0);
+//     // minuit.DefineParameter(1, "delta_m2_32", 4.855e-3, 1e-6, 0.0, 1.0);
+//     // minuit.DefineParameter(2, "sin2_theta_12", 0.607, 0.001, 0.0, 1.0);
+//     // minuit.DefineParameter(3, "sin2_theta_13", 0.0419, 0.001, 0.0, 1.0);
+//     // minuit.DefineParameter(4, "sin2_theta_23", 0.778, 0.001, 0.5, 1.0);
+//     // minuit.DefineParameter(5, "delta_CP", 0.59 * TMath::Pi(), 0.01, 0.0, 2.0 * TMath::Pi());
+
+//     // Perform the minimization
+//     minuit.Migrad();
+
+//     // Retrieve and output the final chi-squared value
+//     double fmin, fedm, errdef;
+//     int npari, nparx, istat;
+//     minuit.mnstat(fmin, fedm, errdef, npari, nparx, istat);
+
+//     // Output the final chi-squared value
+//     std::cout << "Fit completed successfully." << std::endl;
+//     std::cout << "Final chi-squared value: " << fmin << std::endl;
+//     std::cout << "Estimated distance to minimum (EDM): " << fedm << std::endl;
+//     std::cout << "Number of parameters: " << npari << std::endl;
+//     std::cout << "Fit status: " << istat << std::endl;
+// }
+
+
+// // Main function
+// int main(int argc, char** argv) {
+//     try {
+//         // Initialize the fitter
+//         initialize();
+        
+//         // Run the fit
+//         compute_final_flux_fitter();
+
+//         // save_rebinned_histograms("check_event_hists.root");
+
+//         // Output success
+//         std::cout << "Fitter executed successfully." << std::endl;
+//     } catch (const std::exception& ex) {
+//         std::cerr << "Error: " << ex.what() << std::endl;
+//         return EXIT_FAILURE;
+//     } catch (...) {
+//         std::cerr << "Unknown error occurred." << std::endl;
+//         return EXIT_FAILURE;
+//     }
+//     return EXIT_SUCCESS;
+// }
 
 // Function to rebin histograms for expected and observed event rates
 void rebin_histograms() {
@@ -496,6 +663,82 @@ void save_rebinned_histograms(const std::string& output_file_name) {
     output_file.Close();
     std::cout << "All histograms saved to " << output_file_name << "." << std::endl;
 }
+
+void rebin_wing_histograms() {
+    // Define new bin edges for the first dimension
+    const int newBinsX = 9;
+    const int newBinsY = 10;
+    const int blockSizeY = 40; // Number of bins to combine along Y (cosine)
+    
+    // Precomputed bin index mappings for X dimension
+    const int new_bin_indices_x[10] = {0, 135, 156, 173, 196, 221, 248, 281, 322, 399}; 
+
+    // Clear previous rebinned histograms to avoid duplication
+    for (auto* hist : rebinned_expected_event_hists) {
+        delete hist;
+    }
+    rebinned_expected_event_hists.clear();
+
+    for (auto* hist : rebinned_observed_event_hists) {
+        delete hist;
+    }
+    rebinned_observed_event_hists.clear();
+
+    auto createReducedHistogram = [](const std::string& title, const std::string& name) {
+        return new TH2D(name.c_str(), title.c_str(), newBinsX, 0, newBinsX, newBinsY, 0, newBinsY);
+    };
+
+    auto fillReducedHistogram = [&](TH2D* original, TH2D* reduced) {
+        for (int bx = 0; bx < newBinsX; ++bx) {
+            int startX = new_bin_indices_x[bx];
+            int endX = new_bin_indices_x[bx + 1]; // Upper bound for this bin
+
+            for (int by = 0; by < newBinsY; ++by) {
+                double sum = 0.0;
+                
+                for (int ix = startX + 1; ix <= endX; ++ix) { // +1 because TH2D bins are 1-based
+                    for (int iy = 1; iy <= blockSizeY; ++iy) { // Grouping 40 bins in Y
+                        int globalY = by * blockSizeY + iy;
+                        sum += original->GetBinContent(ix, globalY);
+                    }
+                }
+
+                reduced->SetBinContent(bx + 1, by + 1, sum); // Set rebinned value
+            }
+        }
+    };
+
+    // Rebin expected_event_hists
+    for (size_t i = 0; i < expected_event_hists.size(); ++i) {
+        TH2D* original_hist = expected_event_hists[i];
+        if (!original_hist) {
+            std::cerr << "Null histogram in expected_event_hists at index " << i << std::endl;
+            continue;
+        }
+
+        std::string new_hist_name = std::string(original_hist->GetName()) + "_rebinned";
+        TH2D* reduced_hist = createReducedHistogram(original_hist->GetTitle(), new_hist_name);
+
+        fillReducedHistogram(original_hist, reduced_hist);
+        rebinned_expected_event_hists.push_back(reduced_hist);
+    }
+
+    // Rebin observed_event_hists
+    for (size_t i = 0; i < observed_event_hists.size(); ++i) {
+        TH2D* original_hist = observed_event_hists[i];
+        if (!original_hist) {
+            std::cerr << "Null histogram in observed_event_hists at index " << i << std::endl;
+            continue;
+        }
+
+        std::string new_hist_name = std::string(original_hist->GetName()) + "_rebinned";
+        TH2D* reduced_hist = createReducedHistogram(original_hist->GetTitle(), new_hist_name);
+
+        fillReducedHistogram(original_hist, reduced_hist);
+        rebinned_observed_event_hists.push_back(reduced_hist);
+    }
+}
+
 
 
 
