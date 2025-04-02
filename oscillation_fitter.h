@@ -23,13 +23,13 @@ const double runtime = 6 * 365.25 * 24 * 3600;  // Seconds in 6 years
 
 // Atom counts
 const double carbon_ratio = 0.88;
-const double molar_mass_carbon = 12.0106;  // g/mol
+const double molar_mass_carbon = 12.0;  // g/mol
 const double mass_carbon = mass_lab * carbon_ratio * 1e3;  // Convert to grams
 const double moles_carbon = mass_carbon / molar_mass_carbon;
 const double atoms_C12 = moles_carbon * 6.02214076e23;  // Avogadro's number
 
 const double hydrogen_ratio = 0.12;
-const double molar_mass_hydrogen = 1.0079750;  // g/mol
+const double molar_mass_hydrogen = 1.0;  // g/mol
 const double mass_hydrogen = mass_lab * hydrogen_ratio * 1e3;  // Convert to grams
 const double moles_hydrogen = mass_hydrogen / molar_mass_hydrogen;
 const double atoms_H1 = moles_hydrogen * 6.02214076e23;  // Avogadro's number
@@ -60,8 +60,10 @@ void rebin_single_histogram(TH2D*& hist, const double* e_bins, int num_e_bins,
                             const double* cos_bins, int num_cos_bins);
 void rebin_histograms();
 void save_rebinned_histograms(const std::string& output_file_name);
+void save_rebinned_expected_histograms(const std::string& output_file_name);
 
 void rebin_wing_histograms();
+void rebin_div_histograms();
 
 #endif // OSCILLATION_FITTER_H
 

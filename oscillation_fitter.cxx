@@ -2,11 +2,11 @@
 
 // Define absolute paths to ROOT files
 const std::string ROOT_FILES_DIR = "/home/jake/Projects/Fitter/StatOnly/sdu_xcheck/"; // Update this directory on one's own machine
-const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "xcheck_event_invert.root";
-const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "numu_flux.root";
-const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "nue_flux.root";
-const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "numubar_flux.root";
-const std::string NUEBAR_FLUX_ROOT = ROOT_FILES_DIR + "nuebar_flux.root";
+const std::string EVENT_NORMAL_ROOT = ROOT_FILES_DIR + "valor_event_invert.root";
+const std::string NUMU_FLUX_ROOT = ROOT_FILES_DIR + "wing_numu_flux.root";
+const std::string NUE_FLUX_ROOT = ROOT_FILES_DIR + "wing_nue_flux.root";
+const std::string NUMUBAR_FLUX_ROOT = ROOT_FILES_DIR + "wing_numubar_flux.root";
+const std::string NUEBAR_FLUX_ROOT = ROOT_FILES_DIR + "wing_nuebar_flux.root";
 const std::string XSEC_C12_ROOT = ROOT_FILES_DIR + "xcheck_xsec_tot_cc_C12.root";
 const std::string XSEC_H1_ROOT = ROOT_FILES_DIR + "xcheck_xsec_tot_cc_H1.root";
 
@@ -303,20 +303,20 @@ void chi_squared_function() {
     double chi = 0.0;
 
     // IO
-    // const double delta_m2_21   = 7.53e-5;
-    // const double delta_m2_32   = -TMath::Abs(2.529e-3);
-    // const double sin2_theta_12 = 0.307;
-    // const double sin2_theta_13 = 2.19e-2;
-    // const double sin2_theta_23 = 0.553;
-    // const double delta_CP      = 1.19*TMath::Pi();
-
-    // NO
     const double delta_m2_21   = 7.53e-5;
-    const double delta_m2_32   = TMath::Abs(2.455e-3);
+    const double delta_m2_32   = -TMath::Abs(2.529e-3);
     const double sin2_theta_12 = 0.307;
     const double sin2_theta_13 = 2.19e-2;
-    const double sin2_theta_23 = 0.558;
+    const double sin2_theta_23 = 0.553;
     const double delta_CP      = 1.19*TMath::Pi();
+
+    // NO
+    // const double delta_m2_21   = 7.53e-5;
+    // const double delta_m2_32   = TMath::Abs(2.455e-3);
+    // const double sin2_theta_12 = 0.307;
+    // const double sin2_theta_13 = 2.19e-2;
+    // const double sin2_theta_23 = 0.558;
+    // const double delta_CP      = 1.19*TMath::Pi();
 
     // pull[0] = pow((delta_m2_21 - 7.53e-5) / (0.18e-5), 2);
     // pull[1] = pow((delta_m2_32 + 2.529e-3) / (0.029e-3), 2);
@@ -333,6 +333,8 @@ void chi_squared_function() {
 
         double E = 0.0;
         double O = 0.0;
+
+        double indi[4] = {0.0, 0.0, 0.0, 0.0};
 
         for (size_t i = 0; i < flux_histograms.size(); i += 2) { // Step through numu and nue together
             TH2D* numu_flux = flux_histograms[i];
@@ -384,7 +386,7 @@ void chi_squared_function() {
         for (auto* hist : osc_probabilities) delete hist; // Clean up memory
     // }
 
-    rebin_wing_histograms();
+    rebin_div_histograms();
 
     for (size_t i = 0; i < flux_histograms.size(); i++) {
         for (int e_bin = 1; e_bin <= rebinned_expected_event_hists[i]->GetNbinsX(); ++e_bin) {
@@ -392,11 +394,13 @@ void chi_squared_function() {
                 double O = rebinned_expected_event_hists[i]->GetBinContent(e_bin, cos_bin);
                 double E = rebinned_observed_event_hists[i]->GetBinContent(e_bin, cos_bin); 
                 if (E > 0 && O > 0) chi  += 2 * (E - O + O * TMath::Log(O / E));
+                indi[i] += 2 * (E - O + O * TMath::Log(O / E));
             }
         }
     }
 
     std::cout << "Chi-squared value: " << chi << std::endl;
+    std::cout << "Individual chi-squared values: " << indi[0] << " " << indi[1] << " " << indi[2] << " " << indi[3] << std::endl;
 
     // add pull terms to chi2
     // double pull[6];
@@ -428,6 +432,8 @@ int main(int argc, char** argv) {
         
         // Run the fit
         chi_squared_function();
+
+        // save_rebinned_expected_histograms("valor_normal.root");
 
         // save_rebinned_histograms("check_event_hists.root");
 
@@ -671,7 +677,7 @@ void rebin_wing_histograms() {
     const int blockSizeY = 40; // Number of bins to combine along Y (cosine)
     
     // Precomputed bin index mappings for X dimension
-    const int new_bin_indices_x[10] = {0, 135, 156, 173, 196, 221, 248, 281, 322, 399}; 
+    const int new_bin_indices_x[10] = {0, 135, 157, 174, 196, 216, 233, 257, 289, 400}; 
 
     // Clear previous rebinned histograms to avoid duplication
     for (auto* hist : rebinned_expected_event_hists) {
@@ -738,6 +744,109 @@ void rebin_wing_histograms() {
         rebinned_observed_event_hists.push_back(reduced_hist);
     }
 }
+
+void rebin_div_histograms() {
+    // Define new bin edges for the first dimension (energy)
+    const int newBinsX = 9;
+    const int newBinsY = 10;
+    const int blockSizeY = 40; // Number of bins to combine along Y (cosine)
+
+    // Log-spaced binning parameters for original histogram
+    const double minX = 0.1, maxX = 20.0;
+    const int oldBinsX = 400;
+    double log_min = log10(minX);
+    double log_max = log10(maxX);
+    double binWidthX = (log_max - log_min) / oldBinsX;
+
+    // New bin edges
+    const double new_bin_edges_x[newBinsX + 1] = {0.1, 0.6, 0.8, 1.0, 1.35, 1.75, 2.2, 3.0, 4.6, 20.0};
+
+    // Clear previous rebinned histograms to avoid duplication
+    for (auto* hist : rebinned_expected_event_hists) {
+        delete hist;
+    }
+    rebinned_expected_event_hists.clear();
+
+    for (auto* hist : rebinned_observed_event_hists) {
+        delete hist;
+    }
+    rebinned_observed_event_hists.clear();
+
+    // Capture `new_bin_edges_x` by reference
+    auto createReducedHistogram = [&](const std::string& title, const std::string& name) {
+        return new TH2D(name.c_str(), title.c_str(), newBinsX, new_bin_edges_x, newBinsY, 0, newBinsY);
+    };
+
+    auto fillReducedHistogram = [&](TH2D* original, TH2D* reduced) {
+        for (int bx = 0; bx < newBinsX; ++bx) {
+            double startX = new_bin_edges_x[bx];
+            double endX = new_bin_edges_x[bx + 1];
+
+            double sum_weights[newBinsY] = {0.0};
+
+            for (int ix = 1; ix <= oldBinsX; ++ix) {  // TH2D is 1-based
+                double binLowEdge = pow(10, log_min + (ix - 1) * binWidthX);
+                double binUpEdge = pow(10, log_min + ix * binWidthX);
+
+                if (binUpEdge <= startX || binLowEdge >= endX) {
+                    continue;  // Skip bins that don't contribute
+                }
+
+                double weight = 1.0;
+                if (binLowEdge < startX) {
+                    weight = (binUpEdge - startX) / (binUpEdge - binLowEdge);
+                } else if (binUpEdge > endX) {
+                    weight = (endX - binLowEdge) / (binUpEdge - binLowEdge);
+                }
+
+                for (int by = 0; by < newBinsY; ++by) {
+                    double sum = 0.0;
+                    for (int iy = 1; iy <= blockSizeY; ++iy) {
+                        int globalY = by * blockSizeY + iy;
+                        sum += original->GetBinContent(ix, globalY) * weight;
+                    }
+                    sum_weights[by] += sum;
+                }
+            }
+
+            for (int by = 0; by < newBinsY; ++by) {
+                reduced->SetBinContent(bx + 1, by + 1, sum_weights[by]);
+            }
+        }
+    };
+
+    // Rebin expected_event_hists
+    for (size_t i = 0; i < expected_event_hists.size(); ++i) {
+        TH2D* original_hist = expected_event_hists[i];
+        if (!original_hist) {
+            std::cerr << "Null histogram in expected_event_hists at index " << i << std::endl;
+            continue;
+        }
+
+        std::string new_hist_name = std::string(original_hist->GetName()) + "_rebinned";
+        TH2D* reduced_hist = createReducedHistogram(original_hist->GetTitle(), new_hist_name);
+
+        fillReducedHistogram(original_hist, reduced_hist);
+        rebinned_expected_event_hists.push_back(reduced_hist);
+    }
+
+    // Rebin observed_event_hists
+    for (size_t i = 0; i < observed_event_hists.size(); ++i) {
+        TH2D* original_hist = observed_event_hists[i];
+        if (!original_hist) {
+            std::cerr << "Null histogram in observed_event_hists at index " << i << std::endl;
+            continue;
+        }
+
+        std::string new_hist_name = std::string(original_hist->GetName()) + "_rebinned";
+        TH2D* reduced_hist = createReducedHistogram(original_hist->GetTitle(), new_hist_name);
+
+        fillReducedHistogram(original_hist, reduced_hist);
+        rebinned_observed_event_hists.push_back(reduced_hist);
+    }
+}
+
+
 
 
 
